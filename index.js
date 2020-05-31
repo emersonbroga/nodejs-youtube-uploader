@@ -8,17 +8,17 @@ const { generate } = require('./image');
 
 dotenv.config();
 
-const port = 3000;
 const YOUTUBE_API_URL = 'https://www.googleapis.com/auth/youtube';
 const client = process.env.YOUTUBE_CLIENT_ID;
 const secret = process.env.YOUTUBE_CLIENT_SECRET;
 const video_id = process.env.YOUTUBE_VIDEO_ID;
 const channel_id = process.env.YOUTUBE_CHANNEL_ID;
 const token_file = process.env.TOKEN_FILE;
-const redirectUrl = process.env.REDIRECT_URL + ':' + port;
+const redirectUrl = process.env.REDIRECT_URL;
 const stats_file = process.env.STATS_FILE;
+const port = process.env.PORT;
 
-const oauth2Client = new google.auth.OAuth2(client, secret, redirectUrl);
+const oauth2Client = new google.auth.OAuth2(client, secret, `${redirectUrl}:${port}`);
 
 const app = express();
 
