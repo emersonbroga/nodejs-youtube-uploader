@@ -1,0 +1,5 @@
+node_modules/
+temp/
+access_token.json
+thumbnail.jpg
+.env
