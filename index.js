@@ -153,28 +153,34 @@ const updateTitle = (video_id, title, categoryId) => {
 };
 
 async function updateVideo() {
-  // const subscriberCount = await getSubscriberCount();
-  // console.log('Got Subscriber count', subscriberCount);
-  const video = await getVideo(video_id);
-  console.log('Got video', video.snippet.title);
-  const categoryId = video.snippet.categoryId;
-  const { viewCount, likeCount, dislikeCount } = video.statistics;
-  const stats = await readFromFile(stats_file);
-  if (stats.viewCount === viewCount && stats.likeCount === likeCount) {
-    console.log('Stats didnt change', viewCount, likeCount);
-    return;
+  try{
+    console.log('Updating video...');
+    // const subscriberCount = await getSubscriberCount();
+    // console.log('Got Subscriber count', subscriberCount);
+    const video = await getVideo(video_id);
+    console.log('Got video: ', video.snippet.title);
+    const categoryId = video.snippet.categoryId;
+    const { viewCount, likeCount, dislikeCount } = video.statistics;
+    const stats = await readFromFile(stats_file);
+    if (stats.viewCount === viewCount && stats.likeCount === likeCount) {
+      console.log('Stats didnt change: ', viewCount, likeCount);
+      return;
+    }
+    await saveToFile({ viewCount, likeCount }, stats_file);
+
+    const newTitle = `O que é API? Esse video tem ${likeCount} likes e ${viewCount} views!`;
+    const result = await updateTitle(video_id, newTitle, categoryId);
+    console.log('Title updated: ', newTitle );
+    const thumbnail = await generate(likeCount);
+    console.log('Generated thumbnail: ', thumbnail.file);
+    const thumnailUpdate = await updateThumbnail(thumbnail.file);
+    console.log('Thumbnail updated: ', thumbnail.file);
+
+    return result;
+  }catch(error) {
+    console.log('Error updating video');
+    console.log(error);
   }
-  await saveToFile({ viewCount, likeCount }, stats_file);
-
-  const newTitle = `O que é API? Esse video tem ${likeCount} likes e ${viewCount} views!`;
-  const result = await updateTitle(video_id, newTitle, categoryId);
-  console.log('Title updated');
-  const thumbnail = await generate(likeCount);
-  console.log('Generated thumbnail', thumbnail.file);
-  const thumnailUpdate = await updateThumbnail(thumbnail.file);
-  console.log('Thumbnail updated', thumbnail.file);
-
-  return result;
 }
 
 // OAuth Code
