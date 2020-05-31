@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const fs = require('fs');
-const [, , server] = process.argv;
+const [, , image] = process.argv;
 
 const { google } = require('googleapis');
 const { generate } = require('./image');
@@ -16,6 +16,7 @@ const video_id = process.env.YOUTUBE_VIDEO_ID;
 const channel_id = process.env.YOUTUBE_CHANNEL_ID;
 const token_file = process.env.TOKEN_FILE;
 const redirectUrl = process.env.REDIRECT_URL + ':' + port;
+const stats_file = process.env.STATS_FILE;
 
 const oauth2Client = new google.auth.OAuth2(client, secret, redirectUrl);
 
@@ -158,6 +159,13 @@ async function updateVideo() {
   console.log('Got video', video.snippet.title);
   const categoryId = video.snippet.categoryId;
   const { viewCount, likeCount, dislikeCount } = video.statistics;
+  const stats = await readFromFile(stats_file);
+  if (stats.viewCount === viewCount && stats.likeCount === likeCount) {
+    console.log('Stats didnt change', viewCount, likeCount);
+    return;
+  }
+  await saveToFile({ viewCount, likeCount }, stats_file);
+
   const newTitle = `O que é API? Esse video tem ${likeCount} likes e ${viewCount} views!`;
   const result = await updateTitle(video_id, newTitle, categoryId);
   console.log('Title updated');
@@ -165,6 +173,7 @@ async function updateVideo() {
   console.log('Generated thumbnail', thumbnail.file);
   const thumnailUpdate = await updateThumbnail(thumbnail.file);
   console.log('Thumbnail updated', thumbnail.file);
+
   return result;
 }
 
@@ -174,6 +183,7 @@ app.get('/', async (req, res) => {
   if (code) {
     const tokens = await oauth2Client.getToken(code);
     const stored = await saveToFile(tokens, token_file);
+    const stats_stored = await saveToFile({ viewCount: 0, likeCount: 0 }, stats_file);
     const message = stored ? 'Success! Token stored successfully' : 'Failed!';
     return res.json({ message });
   }
@@ -186,10 +196,10 @@ app.get('/', async (req, res) => {
   return res.redirect(url);
 });
 
-if (server) {
+if (image) {
+  updateVideo();
+} else {
   app.listen(port, () => {
     console.log('Listening on: ', redirectUrl);
   });
-} else {
-  updateVideo();
 }

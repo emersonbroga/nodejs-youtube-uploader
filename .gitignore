@@ -1,5 +1,6 @@
 node_modules/
 temp/
 access_token.json
+stats.json
 thumbnail.jpg
 .env
