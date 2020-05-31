@@ -200,6 +200,6 @@ if (image) {
   updateVideo();
 } else {
   app.listen(port, () => {
-    console.log('Listening on: ', redirectUrl);
+    console.log('Listening on: ', `${redirectUrl}:${port}`);
   });
 }
