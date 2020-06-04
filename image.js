@@ -58,7 +58,7 @@ const processArray = (items) => {
   const promiseCallback = async (resolve, reject) => {
     try {
       for (const index in items) {
-        const result = await compose(items[index], index);
+        const result = await compose(parseInt(items[index], index);
       }
       resolve(true);
     } catch (error) {
@@ -104,6 +104,4 @@ const generate = (number) => {
 
   return new Promise(promiseCallback);
 };
-
-generate(963852);
 module.exports = { generate };
