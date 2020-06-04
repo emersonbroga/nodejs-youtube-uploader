@@ -129,7 +129,7 @@ const getVideo = (video_id) => {
   return new Promise(promiseCallback);
 };
 
-const updateTitle = (video_id, title, categoryId) => {
+const updateTitle = (video_id, title, categoryId, description) => {
   const promiseCallback = async (resolve, reject) => {
     try {
       const youtube = await getYoutubeClient();
@@ -139,6 +139,7 @@ const updateTitle = (video_id, title, categoryId) => {
           snippet: {
             title,
             categoryId,
+            description,
           },
         },
         part: 'snippet',
@@ -153,13 +154,14 @@ const updateTitle = (video_id, title, categoryId) => {
 };
 
 async function updateVideo() {
-  try{
+  try {
     console.log('Updating video...');
     // const subscriberCount = await getSubscriberCount();
     // console.log('Got Subscriber count', subscriberCount);
     const video = await getVideo(video_id);
     console.log('Got video: ', video.snippet.title);
     const categoryId = video.snippet.categoryId;
+    const description = video.snippet.description;
     const { viewCount, likeCount, dislikeCount } = video.statistics;
     const stats = await readFromFile(stats_file);
     if (stats.viewCount === viewCount && stats.likeCount === likeCount) {
@@ -169,15 +171,15 @@ async function updateVideo() {
     await saveToFile({ viewCount, likeCount }, stats_file);
 
     const newTitle = `O que é API? Esse video tem ${likeCount} likes e ${viewCount} views!`;
-    const result = await updateTitle(video_id, newTitle, categoryId);
-    console.log('Title updated: ', newTitle );
+    const result = await updateTitle(video_id, newTitle, categoryId, description);
+    console.log('Title updated: ', newTitle);
     const thumbnail = await generate(likeCount);
     console.log('Generated thumbnail: ', thumbnail.file);
     const thumnailUpdate = await updateThumbnail(thumbnail.file);
     console.log('Thumbnail updated: ', thumbnail.file);
 
     return result;
-  }catch(error) {
+  } catch (error) {
     console.log('Error updating video');
     console.log(error);
   }
@@ -188,6 +190,7 @@ app.get('/', async (req, res) => {
   const { code } = req.query;
   if (code) {
     const tokens = await oauth2Client.getToken(code);
+
     const stored = await saveToFile(tokens, token_file);
     const stats_stored = await saveToFile({ viewCount: 0, likeCount: 0 }, stats_file);
     const message = stored ? 'Success! Token stored successfully' : 'Failed!';
