@@ -201,6 +201,7 @@ app.get('/', async (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: scopes,
+    prompt: 'consent',
   });
   return res.redirect(url);
 });
