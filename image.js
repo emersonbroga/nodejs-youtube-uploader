@@ -58,7 +58,7 @@ const processArray = (items) => {
   const promiseCallback = async (resolve, reject) => {
     try {
       for (const index in items) {
-        const result = await compose(parseInt(items[index], index);
+        const result = await compose(items[index], index);
       }
       resolve(true);
     } catch (error) {
